@@ -1,0 +1,15 @@
+%% Function to calculate the distance between atoms on the y-axis (delta)
+% delta is the distance between the atoms on the y-axis in meters
+% theta_out is the angle of the outgoing wave in degrees
+% freq is the frequency (in Hz)
+% param is a structure containing physical parameters (from get_parameters function)
+% Returns:
+%   delta - The distance between the atoms on the y-axis in meters
+
+function delta = find_delta(theta_out, freq, param)
+    % Calculate delta based on the formula:
+    % delta = (2 * pi) / (k_0 * sin(theta_out))
+    % where k_0 is the wavenumber in free space
+
+    delta = (2*pi) ./ (param.k_0 .* sind(theta_out));  % using sind to handle degree input
+end

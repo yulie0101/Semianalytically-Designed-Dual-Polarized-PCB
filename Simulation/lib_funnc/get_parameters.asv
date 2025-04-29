@@ -1,0 +1,14 @@
+%% pram
+
+function param = get_parameters(freq, miu, eps)
+    param.E_in = 1;
+    param.C = physconst('LightSpeed');
+    param.eps_0 = 8.8541878188e-12;
+    param.k_0 = 2*pi*freq/C;
+    param.eta_0 = 376.730313412;
+    param.
+    param.n = sqrt(miu*eps);
+    param.eta = eta_0*sqrt(miu/eps);
+    param.k = k_0*n;
+    param.lambda = C/(n*f);
+end

@@ -1,0 +1,69 @@
+close all;
+
+% Constants
+
+addpath('C:\Users\mayag\OneDrive - Technion\technion\projectA\prep\realization_article\lib_funnc')
+
+freq = 20e9;
+
+param = get_parameters(freq);
+
+
+theta_out_vec = linspace(30, 80, 200); % deg
+alpha_over_lx_vec = zeros(size(theta_out_vec));
+
+%% h calc
+
+% Define the function to solve
+fun = @(h, theta) (sin(param.k*h)).^2 - 2*cos(deg2rad(theta)).*(sin(param.k*h*cos(deg2rad(theta)))).^2;
+
+% Guessing an initial value according to the solution branch chosen in the article
+h_initial_guess = 0.55 * param.lambda;
+
+% Use arrayfun to solve for each theta_out
+h_vec = arrayfun(@(theta) fzero(@(h) fun(h, theta), h_initial_guess), theta_out_vec);
+
+%%
+% Summation parameters
+N_max = 500; 
+M_max = 500;
+
+for idx = 1:length(theta_out_vec)
+    theta_out = theta_out_vec(idx);
+    h = h_vec(idx);
+    delta = find_delta(theta_out, freq, param);
+
+    % (a) kx and beta_m
+    m_vec = -M_max:M_max;
+    kx_m = (2*pi*m_vec)/delta;
+    beta_m = sqrt(param.k^2 - kx_m.^2);
+    % Making sure that beta is physical -  make real parts positive and imaginary parts negative
+    beta_m(real(beta_m) < 0) = -beta_m(real(beta_m) < 0);
+    beta_m(imag(beta_m) > 0) = -beta_m(imag(beta_m) > 0);
+
+    % (b) Hankel sum
+    n_vec = 1:N_max;
+    Hankel_terms = besselh(1, 2, n_vec*param.k*delta) ./ (n_vec*delta);
+    Hankel_sum = sum(Hankel_terms);
+    
+    % (c) Beta_m sum
+    beta_m_sum = sum(beta_m .* exp(-2j * beta_m * h));
+    
+    % (d) Full expression
+    term1 = 2j * param.omega * param.eta / delta * sin(param.k*h)^2;
+    term2 = -1j * param.eta * param.omega / 2 * Hankel_sum;
+    term3 = 1j * param.eta * param.C / (2 * delta) * beta_m_sum;
+    
+    alpha_over_lx_vec(idx) = 1 / (term1 + term2 + term3);
+end
+
+% Plotting
+figure;
+plot(theta_out_vec, real(alpha_over_lx_vec)/(param.lambda^2 * param.eps_0), 'b-', 'LineWidth', 1.5); hold on;
+plot(theta_out_vec, imag(alpha_over_lx_vec)/(param.lambda^2 * param.eps_0), 'r-', 'LineWidth', 1.5);
+xlabel('Split angle \theta_{out} [deg]');
+ylabel('Polarizability \alpha/l_x [\lambda^2\epsilon_0]');
+xlim([35 80]);
+legend('Real part', 'Imaginary part');
+grid on;
+title('Polarizability vs Split Angle');
