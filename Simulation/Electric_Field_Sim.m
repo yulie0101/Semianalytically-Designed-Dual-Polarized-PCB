@@ -13,32 +13,35 @@ epsilon_0 = 8.854187817e-12;  % Permittivity of free space [F/m]
 mu_0 = 4*pi*1e-7;             % Permeability of free space [H/m]
 c = physconst('LightSpeed');
 
-function [alfa, delta, h, p_over_l, miu, eps, freq, k0, E_in] = Mayas (theta_out)
+% function [alfa, delta, h, p_over_l, miu, eps, freq, k0, E_in] = Mayas (theta_out)
+% 
+%     alfa = 1;
+%     E_in = 1;
+%     eps = 1;
+%     miu = 1;
+%     c = physconst('LightSpeed');
+%     freq = 20e9;
+%     lambda = physconst('LightSpeed') / freq;
+%     k = 2 * pi / lambda;
+%     h = 0.66 * lambda;
+%     delta = 1.15 * lambda;
+%     k0 = 2*pi*freq/physconst('LightSpeed');  % free-space wavenumber
+%     epsilon_0 = 8.854187817e-12;  % Permittivity of free space [F/m]
+%     mu_0 = 4*pi*1e-7;             % Permeability of free space [H/m]
+%     eta = sqrt((mu_0 * miu) / (epsilon_0 * eps));
+%     p_over_l = delta/(2*pi*freq*eta);
+% end
+% 
+% [alfa, delta, h, p_over_l, miu, eps, freq, k0, E_in] = Mayas(theta_out);
 
-    alfa = 1;
-    E_in = 1;
-    eps = 1;
-    miu = 1;
-    c = physconst('LightSpeed');
-    freq = 20e9;
-    lambda = physconst('LightSpeed') / freq;
-    k = 2 * pi / lambda;
-    h = 0.66 * lambda;
-    delta = 1.15 * lambda;
-    k0 = 2*pi*freq/physconst('LightSpeed');  % free-space wavenumber
-    epsilon_0 = 8.854187817e-12;  % Permittivity of free space [F/m]
-    mu_0 = 4*pi*1e-7;             % Permeability of free space [H/m]
-    eta = sqrt((mu_0 * miu) / (epsilon_0 * eps));
-    p_over_l = delta/(2*pi*freq*eta);
-end
-
-[alfa, delta, h, p_over_l, miu, eps, freq, k0, E_in] = Mayas(theta_out);
+[delta, h, alpha_over_l, p_over_lx, param] = MA_param(theta_out, freq);
 
 % constant deriven:
-eta = sqrt((mu_0 * miu) / (epsilon_0 * eps));
-omega = 2 * pi * freq;
-lambda = c / freq;
-k = k0 * sqrt(eps * miu);
+E_in = param.E_in;
+eta = param.eta;
+omega = param.omega;
+lambda = param.lambda;
+k = param.k;
 
 % axes
 z = linspace(-3 * lambda, 0, 1500);     % [1 X 1500]
@@ -60,7 +63,7 @@ kt_m_grid = reshape(kt_m_vals, 1, 1, []);   % [1 X 1 X 101]
 
 
 % above coefficients
-coeff_m = -0.5j * ((eta * c * p_over_l) / delta) .* beta_m_grid; 
+coeff_m = -0.5j * ((eta * c * p_over_lx) / delta) .* beta_m_grid; 
 y_exp = exp(-1j * kt_m_grid .* Y);     
 z_exp = exp(-1j * beta_m_grid .* abs(Z + h)) - exp(-1j * beta_m_grid .* abs(Z - h));     
 sum_terms = coeff_m .* z_exp .* y_exp;

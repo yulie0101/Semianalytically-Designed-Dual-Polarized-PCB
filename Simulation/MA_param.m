@@ -18,7 +18,7 @@ function [delta, h, alpha_over_lx, p_over_lx, param] = MA_param(theta_out, freq)
     
     % Retrieve basic physical parameters based on the operating frequency
     param = get_parameters(freq);
-    w
+    
     % Calculate the atom periodicity (delta) along the y-axis
     delta = find_delta(theta_out, freq, param);
     
